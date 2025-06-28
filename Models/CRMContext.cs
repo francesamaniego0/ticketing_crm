@@ -17,5 +17,6 @@ namespace CRM.Models
         public virtual DbSet<TblProjectModel> TblProjects { get; set; }
         public virtual DbSet<TblProjectContactPersonsModel> TblProjectContactPersons { get; set; }
         public virtual DbSet<TblAudittrail> TblAudittrails { get; set; }
+        public virtual DbSet<TblProjectDocument> TblProjectDocument { get; set; }
     }
 }

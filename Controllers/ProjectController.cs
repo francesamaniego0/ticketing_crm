@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using Microsoft.EntityFrameworkCore;
 using static CRM.Controllers.ClientController;
+using static CRM.Controllers.TeamController;
 
 namespace CRM.Controllers
 {
@@ -56,7 +57,17 @@ namespace CRM.Controllers
             public string? Location { get; set; }
             public int? TeamId { get; set; }
             public string? TeamName { get; set; }
+            public string? TeamSuperVisorId { get; set; }
+            public string? TeamSuperVisorName { get; set; }
+            public string? TeamSuperVisorEmail { get; set; }
             public List<ContactPersonsModel> ContactPersons { get; set; } = new List<ContactPersonsModel>(); // Prevent null reference
+            public List<TeamMemberModel> Members { get; set; } = new List<TeamMemberModel>(); // Prevent null reference
+        }
+        public class TeamMemberModel
+        {
+            public int? MemberId { get; set; }
+            public string? MemberName { get; set; }
+            public string? MemberEmail { get; set; }
         }
         public class ContactPersonsModel
         {
@@ -81,75 +92,154 @@ namespace CRM.Controllers
             int totalItems = 0;
             int totalPages = 0;
             string page_size = pageSize == 0 ? "10" : pageSize.ToString();
-            try { 
+            try {
+                //var result = from project in dbProject
+
+                //             join dbpcpersons in dbpcperson
+                //             on project.Id equals dbpcpersons.ProjectId into pcpersonsGroup
+                //             from dbpcpersons in pcpersonsGroup.DefaultIfEmpty() // Left Join with Team Members
+
+                //             join dbcpersons in dbcperson
+                //             on dbpcpersons.ContactPersonId equals dbcpersons.Id into dbcpersonsGroup
+                //             from dbcpersons in dbcpersonsGroup.DefaultIfEmpty() // Left Join with Team Members
+
+                //             join dbteams in dbteam
+                //             on project.Team equals dbteams.Id into teamsGroup
+                //             from dbteams in teamsGroup.DefaultIfEmpty() // Left Join with Team Members
+
+                //             join superVisor in apiUsers
+                //             on dbteams.SuperVisorId equals superVisor.Id into superVisorGroup
+                //             from superVisor in superVisorGroup.DefaultIfEmpty() // Left Join with API Users
+
+                //             join dbteammembers in dbteammember
+                //             on dbteams.Id equals dbteammembers.Team into teammembersGroup
+                //             from dbteammembers in teammembersGroup.DefaultIfEmpty() // Left Join with Team Members
+
+                //             join memberName in apiUsers
+                //             on dbteammembers != null ? dbteammembers.MemberId : null equals memberName.Id into memberNameGroup
+                //             from memberName in memberNameGroup.DefaultIfEmpty() // Left Join with API Users for Member Details
+
+                //             join dbclients in dbclient
+                //             on project.Client equals dbclients.Id into clientGroup
+                //             from dbclients in clientGroup.DefaultIfEmpty() // Left Join with Team Members
+
+                //             where project.DeleteFlag == false // Filtering condition
+                //             group new
+                //             {
+                //                 ContactPersonId = dbcpersons?.Id, // Keep null if no member exists
+                //                 ContactPersonName = dbcpersons?.Fullname, // Keep null if no name exists
+                //                 ContactPersonEmail = dbcpersons?.Email,
+                //                 ContactPersonCNumber = dbcpersons?.ContactNumber,
+
+                //                 MemberId = memberName?.Id, // Keep null if no member exists
+                //                 MemberName = memberName?.Fullname, // Keep null if no name exists
+                //                 MemberEmail = memberName?.Email, // Keep null if no name exists
+                //             }
+                //             by new
+                //             {
+                //                 ProjectId = project?.Id,
+                //                 ProjectTitle = project?.Title,
+                //                 ProjectDescription = project?.Description,
+                //                 TeamId = dbteams?.Id,
+                //                 TeamName = dbteams?.TeamName,
+                //                 TeamSuperVisorId = superVisor?.Id,
+                //                 TeamSuperVisorName = superVisor?.Fullname,
+                //                 TeamSuperVisorEmail = superVisor?.Email,
+                //                 ClientId = dbclients?.Id,
+                //                 ClientName = dbclients?.ClientName,
+                //                 Location = dbclients?.Location,
+                //                 ContactPersonId = dbpcpersons?.ContactPersonId
+                //             }
+                //             into projectGroup
+
+                //             select new ProjectModel
+                //             {
+                //                 ProjectId = projectGroup.Key.ProjectId,
+                //                 ProjectTitle = projectGroup.Key.ProjectTitle,
+                //                 ProjectDescription = projectGroup.Key.ProjectDescription,
+                //                 ClientId = projectGroup.Key.ClientId,
+                //                 ClientName = projectGroup.Key.ClientName,
+                //                 Location = projectGroup.Key.Location,
+                //                 ContactPersons = projectGroup
+                //                                   .Where(m => m.ContactPersonId != null) // Ensure we exclude null members
+                //                                   .DistinctBy(m => m.ContactPersonId)
+                //                                   .Select(m => new ContactPersonsModel
+                //                                   {
+                //                                       ContactPersonId = m.ContactPersonId.ToString() ?? "No Member",
+                //                                       ContactPersonName = m.ContactPersonName ?? "Unknown",
+                //                                       ContactPersonEmail = m.ContactPersonEmail ?? "Unknown",
+                //                                       ContactPersonCNumber = m.ContactPersonCNumber ?? "Unknown",
+
+                //                                   }).ToList(),
+                //                 TeamId = projectGroup.Key.TeamId,
+                //                 TeamName = projectGroup.Key.TeamName,
+                //                 TeamSuperVisorId = projectGroup.Key.TeamSuperVisorId.ToString(),
+                //                 TeamSuperVisorName = projectGroup.Key.TeamSuperVisorName,
+                //                 TeamSuperVisorEmail = projectGroup.Key.TeamSuperVisorEmail,
+                //                 Members = projectGroup
+                //                            .Where(m => m.MemberId != null) // Exclude null members
+                //                            .DistinctBy(m => m.MemberId)
+                //                            .Select(m => new TeamMemberModel
+                //                            {
+                //                                MemberId = m.MemberId ?? 0,
+                //                                MemberName = m.MemberName ?? "Unknown",
+                //                                MemberEmail = m.MemberEmail ?? "Unknown",
+                //                            }).ToList()
+
+                //             };
                 var result = from project in dbProject
+                             join dbteams in dbteam on project.Team equals dbteams.Id into teamsGroup
+                             from dbteams in teamsGroup.DefaultIfEmpty()
 
-                             join dbpcpersons in dbpcperson
-                             on project.Id equals dbpcpersons.ProjectId into pcpersonsGroup
-                             from dbpcpersons in pcpersonsGroup.DefaultIfEmpty() // Left Join with Team Members
+                             join superVisor in apiUsers on dbteams.SuperVisorId equals superVisor.Id into superVisorGroup
+                             from superVisor in superVisorGroup.DefaultIfEmpty()
 
-                             join dbcpersons in dbcperson
-                             on dbpcpersons.ContactPersonId equals dbcpersons.Id into dbcpersonsGroup
-                             from dbcpersons in dbcpersonsGroup.DefaultIfEmpty() // Left Join with Team Members
+                             join dbclients in dbclient on project.Client equals dbclients.Id into clientGroup
+                             from dbclients in clientGroup.DefaultIfEmpty()
 
-                             join dbteams in dbteam
-                             on project.Team equals dbteams.Id into teamsGroup
-                             from dbteams in teamsGroup.DefaultIfEmpty() // Left Join with Team Members
-
-                             //join dbteammembers in dbteammember
-                             //on dbteams.Id equals dbteammembers.Team into teammembersGroup
-                             //from dbteammembers in teammembersGroup.DefaultIfEmpty() // Left Join with Team Members
-
-                             join dbclients in dbclient
-                             on project.Client equals dbclients.Id into clientGroup
-                             from dbclients in clientGroup.DefaultIfEmpty() // Left Join with Team Members
-
-                             where project.DeleteFlag == false // Filtering condition
-                             group new
-                             {
-
-                                 ContactPersonId = dbcpersons?.Id, // Keep null if no member exists
-                                 ContactPersonName = dbcpersons?.Fullname, // Keep null if no name exists
-                                 ContactPersonEmail = dbcpersons?.Email,
-                                 ContactPersonCNumber = dbcpersons?.ContactNumber,
-                             }
-                             by new
-                             {
-                                 ProjectId = project?.Id,
-                                 ProjectTitle = project?.Title,
-                                 ProjectDescription = project?.Description,
-                                 TeamId = dbteams?.Id,
-                                 TeamName = dbteams?.TeamName,
-                                 ClientId = dbclients?.Id,
-                                 ClientName = dbclients?.ClientName,
-                                 Location = dbclients?.Location,
-                                 ContactPersonId = dbpcpersons?.ContactPersonId
-
-
-                             }
-                             into projectGroup
+                             where project.DeleteFlag == false
 
                              select new ProjectModel
                              {
-                                 ProjectId = projectGroup.Key.ProjectId,
-                                 ProjectTitle = projectGroup.Key.ProjectTitle,
-                                 ProjectDescription = projectGroup.Key.ProjectDescription,
-                                 ClientId = projectGroup.Key.ClientId,
-                                 ClientName = projectGroup.Key.ClientName,
-                                 Location = projectGroup.Key.Location,
-                                 TeamId = projectGroup.Key.TeamId,
-                                 TeamName = projectGroup.Key.TeamName,
-                                 ContactPersons = projectGroup.Where(m => m.ContactPersonId != null) // Ensure we exclude null members
-                                                   .Select(m => new ContactPersonsModel
+                                 ProjectId = project.Id,
+                                 ProjectTitle = project.Title,
+                                 ProjectDescription = project.Description,
+                                 ClientId = dbclients?.Id,
+                                 ClientName = dbclients?.ClientName,
+                                 Location = dbclients?.Location,
+
+                                 TeamId = dbteams?.Id,
+                                 TeamName = dbteams?.TeamName,
+                                 TeamSuperVisorId = superVisor?.Id.ToString(),
+                                 TeamSuperVisorName = superVisor?.Fullname,
+                                 TeamSuperVisorEmail = superVisor?.Email,
+
+                                 ContactPersons = (from pcp in dbpcperson
+                                                   join cp in dbcperson on pcp.ContactPersonId equals cp.Id
+                                                   where pcp.ProjectId == project.Id
+                                                   select new ContactPersonsModel
                                                    {
-                                                       ContactPersonId = m.ContactPersonId.ToString() ?? "No Member",
-                                                       ContactPersonName = m.ContactPersonName ?? "Unknown",
-                                                       ContactPersonEmail = m.ContactPersonEmail ?? "Unknown",
-                                                       ContactPersonCNumber = m.ContactPersonCNumber ?? "Unknown",
+                                                       ContactPersonId = cp.Id.ToString(),
+                                                       ContactPersonName = cp.Fullname ?? "Unknown",
+                                                       ContactPersonEmail = cp.Email ?? "Unknown",
+                                                       ContactPersonCNumber = cp.ContactNumber ?? "Unknown"
+                                                   })
+                                                   .DistinctBy(cp => cp.ContactPersonId)
+                                                   .ToList(),
 
-                                                   }).ToList()
-
+                                 Members = (from tm in dbteammember
+                                            join user in apiUsers on tm.MemberId equals user.Id
+                                            where tm.Team == dbteams.Id
+                                            select new TeamMemberModel
+                                            {
+                                                MemberId = user.Id,
+                                                MemberName = user.Fullname ?? "Unknown",
+                                                MemberEmail = user.Email ?? "Unknown"
+                                            })
+                                            .DistinctBy(m => m.MemberId)
+                                            .ToList()
                              };
+
                 // **Add condition dynamically if `data` is not null**
                 if (data.Id != null && data.Id != 0)
                 {
@@ -309,5 +399,176 @@ namespace CRM.Controllers
                 return Problem(ex.GetBaseException().ToString());
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveProjectDocuments([FromBody] List<TblProjectDocument> data)
+        {
+            try
+            {
+                foreach (var item in data)
+                {
+                    _context.TblProjectDocument.Add(item);
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok("Files saved.");
+            }
+            catch (Exception ex)
+            {
+                dbmet.InsertAuditTrail("Save Project File " + ex.Message,
+                    DateTime.Now.ToString("yyyy-MM-dd"),
+                    "Project File Module",
+                    "User", "0");
+                return Problem(ex.GetBaseException().ToString());
+            }
+        }
+        public class ProjectDocumentsDeleteParam{
+            public int Id { get; set; }
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteProjectDocuments( List<ProjectDocumentsDeleteParam> data)
+        {
+            try
+            {
+                foreach (var item in data)
+                {
+                    var items = _context.TblProjectDocument.Where(a => a.Id == item.Id).FirstOrDefault();
+                    
+                    _context.TblProjectDocument.Remove(items);
+                    
+                }
+                //_context.SaveChanges();
+                await _context.SaveChangesAsync();
+                return Ok("Files Deleted.");
+            }
+            catch (Exception ex)
+            {
+                dbmet.InsertAuditTrail("Save Delete File " + ex.Message,
+                    DateTime.Now.ToString("yyyy-MM-dd"),
+                    "Project File Module",
+                    "User", "0");
+                return Problem(ex.GetBaseException().ToString());
+            }
+        }
+        public class ProjectDocumentsParam
+        {
+            public int? ProjectId { get; set; }
+            public string? FileName { get; set; }
+        }
+        public class ProjectDocumentsModel
+        {
+            public int Id { get; set; }
+            public int? ProjectId { get; set; }
+            public string? FileName { get; set; }
+            public string? FilePath { get; set; }
+            public string? FileExtension { get; set; }
+            public bool? IsDeleted { get; set; }
+            public int? CreatedBy { get; set; }
+            public string? CreatedByName { get; set; }
+            public DateTime? DateCreated { get; set; }
+            public int? DeletedBy { get; set; }
+            public DateTime? DateDeleted { get; set; }
+        }
+        [HttpPost]
+        public async Task<IActionResult> PostProjectDocuments(ProjectDocumentsParam data)
+        {
+            try
+            {
+                List<GetAllUserDetailsResult> apiUsers = await _externalApiService.FetchDataFromExternalApi();
+                var ProjectDocumentsDB = _context.TblProjectDocument.Where(a => a.IsDeleted == false).ToList();
+                var result = from projectDocumentDB in ProjectDocumentsDB
+                             join user in apiUsers on projectDocumentDB.CreatedBy equals user.Id into userGroup
+                             from user in userGroup.DefaultIfEmpty()
+                             select new ProjectDocumentsModel
+                             {
+                                 Id = projectDocumentDB.Id,
+                                 ProjectId = projectDocumentDB.ProjectId,
+                                 FileName = projectDocumentDB.FileName,
+                                 FilePath = projectDocumentDB.FilePath,
+                                 FileExtension = projectDocumentDB.FileExtension,
+                                 IsDeleted = projectDocumentDB.IsDeleted,
+                                 CreatedBy = projectDocumentDB.CreatedBy,
+                                 CreatedByName = user != null ? user.Fullname ?? "Unknown" : "Unknown",
+                                 DateCreated = projectDocumentDB.DateCreated,
+                                 DeletedBy = projectDocumentDB.DeletedBy,
+                                 DateDeleted = projectDocumentDB.DateDeleted,
+
+
+                             };
+                if (data.ProjectId != 0)
+                {
+                    result = result.Where(a => a.ProjectId == data.ProjectId).ToList();
+                }
+                if(data.FileName != "" && data.FileName != null)
+                {
+                    result = result.Where(a => a.FileName.ToLower().Contains(data.FileName.ToLower())).ToList();
+                }
+                return Ok(result.ToList());
+            }
+            catch (Exception ex)
+            {
+               
+                return Problem(ex.GetBaseException().ToString());
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> PostProjectDocumentsFilteredById(List<ProjectDocumentsDeleteParam> data)
+        {
+            try
+            {   // Get list of IDs from the input
+                var idsToFilter = data.Select(d => d.Id).ToList();
+                List<GetAllUserDetailsResult> apiUsers = await _externalApiService.FetchDataFromExternalApi();
+                //var ProjectDocumentsDB = _context.TblProjectDocument.Where(a => a.IsDeleted == false).ToList();
+                // Get project documents that are not deleted AND match the filtered IDs
+                var ProjectDocumentsDB = _context.TblProjectDocument
+                    .Where(a => a.IsDeleted == false && idsToFilter.Contains(a.Id))
+                    .ToList();
+
+
+                var result = from projectDocumentDB in ProjectDocumentsDB
+                             join user in apiUsers on projectDocumentDB.CreatedBy equals user.Id into userGroup
+                             from user in userGroup.DefaultIfEmpty()
+                             select new ProjectDocumentsModel
+                             {
+                                 Id = projectDocumentDB.Id,
+                                 ProjectId = projectDocumentDB.ProjectId,
+                                 FileName = projectDocumentDB.FileName,
+                                 FilePath = projectDocumentDB.FilePath,
+                                 FileExtension = projectDocumentDB.FileExtension,
+                                 IsDeleted = projectDocumentDB.IsDeleted,
+                                 CreatedBy = projectDocumentDB.CreatedBy,
+                                 CreatedByName = user != null ? user.Fullname ?? "Unknown" : "Unknown",
+                                 DateCreated = projectDocumentDB.DateCreated,
+                                 DeletedBy = projectDocumentDB.DeletedBy,
+                                 DateDeleted = projectDocumentDB.DateDeleted,
+
+
+                             };
+                return Ok(result.ToList());
+            }
+            catch (Exception ex)
+            {
+
+                return Problem(ex.GetBaseException().ToString());
+            }
+        }
+        //[HttpPost]
+        //public async Task<IActionResult> ProjectContactPerson(ProjectParam data)
+        //{
+        //    var dbpcperson = _context.TblProjectContactPersons.OrderByDescending(a => a.Id).ToList();
+
+        //    try
+        //    {
+        //        var results = dbpcperson.Where()
+        //        return Ok(results);
+        //        //return Ok(finalResult);
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest("ERROR:" + ex);
+        //    }
+        //}
     }
 }

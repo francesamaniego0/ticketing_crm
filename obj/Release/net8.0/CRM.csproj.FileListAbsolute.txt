@@ -172,3 +172,4 @@ C:\Users\franc\source\repos\CRM\CRM\obj\Release\net8.0\CRM.genruntimeconfig.cach
 C:\Users\franc\source\repos\CRM\CRM\obj\Release\net8.0\ref\CRM.dll
 C:\Users\franc\source\repos\CRM\CRM\obj\Release\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\franc\source\repos\CRM\CRM\bin\Release\net8.0\Newtonsoft.Json.Bson.dll
+C:\Users\franc\source\repos\CRM\CRM\obj\Release\net8.0\CRM.sourcelink.json

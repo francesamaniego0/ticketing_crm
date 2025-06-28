@@ -51,6 +51,7 @@ namespace CRM.Controllers
             public string? TeamName { get; set; }
             public int? SuperVisorId { get; set; }
             public string? SuperVisorName { get; set; }
+            public string? SuperVisorEmail { get; set; }
             public int? ClientId { get; set; }
             public string? ClientName { get; set; }
             public List<TeamMemberModel> Members { get; set; } = new List<TeamMemberModel>(); // Prevent null reference
@@ -59,6 +60,7 @@ namespace CRM.Controllers
         {
             public int? MemberId { get; set; }
             public string? MemberName { get; set; }
+            public string? MemberEmail { get; set; }
         }
 
         [HttpPost]
@@ -99,6 +101,7 @@ namespace CRM.Controllers
                              {
                                  MemberId = member?.MemberId, // Keep null if no member exists
                                  MemberName = memberName?.Fullname, // Keep null if no name exists
+                                 MemberEmail = memberName?.Email, // Keep null if no name exists
                              }
                              by new
                              {
@@ -106,6 +109,7 @@ namespace CRM.Controllers
                                  TeamName = team?.TeamName,
                                  SuperVisorId = team?.SuperVisorId,
                                  SuperVisorName = apiUser?.Fullname,
+                                 SuperVisorEmail = apiUser?.Email,
                                  ClientId = clientName?.Id,
                                  ClientName = clientName?.ClientName
                              } into teamGroup
@@ -115,6 +119,7 @@ namespace CRM.Controllers
                                  TeamName = teamGroup.Key.TeamName,
                                  SuperVisorId = teamGroup.Key.SuperVisorId,
                                  SuperVisorName = teamGroup.Key.SuperVisorName,
+                                 SuperVisorEmail = teamGroup.Key.SuperVisorEmail,
                                  ClientId = teamGroup.Key.ClientId,
                                  ClientName = teamGroup.Key.ClientName,
                                  Members = teamGroup
@@ -123,6 +128,7 @@ namespace CRM.Controllers
                                             {
                                                 MemberId = m.MemberId ?? 0,
                                                 MemberName = m.MemberName ?? "Unknown",
+                                                MemberEmail = m.MemberEmail ?? "Unknown",
                                             }).ToList()
                              };
                 // **Add condition dynamically if `data` is not null**

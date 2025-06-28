@@ -155,6 +155,7 @@ C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\CRM.AssemblyInfo.cs
 C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\CRM.csproj.CoreCompileInputs.cache
 C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\CRM.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\CRM.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\CRM.sourcelink.json
 C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\scopedcss\bundle\CRM.styles.css
 C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\franc\source\repos\CRM\CRM\obj\Debug\net8.0\staticwebassets.development.json
